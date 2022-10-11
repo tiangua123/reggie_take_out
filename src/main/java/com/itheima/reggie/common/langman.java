@@ -11,7 +11,7 @@ public class langman {
 
     public static  void heart2(){
         double x,y,a;
-        char s[]=new char[]{'叶',' ','子','金','危','晔',' ','叶','危','金','子'};
+        char s[]=new char[]{'q',' ','子','金','危','晔',' ','叶','危','金','子'};
         int index=0;
         for(y=1.3f;y>-1.1f;y-=0.06f){
             index=0;
