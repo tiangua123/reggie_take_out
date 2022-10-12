@@ -8,6 +8,7 @@ import com.itheima.reggie.service.UserService;
 import com.itheima.reggie.utils.ValidateCodeUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpSession;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/user")
@@ -24,6 +26,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
 
     @PostMapping("/sendMsg")
@@ -34,7 +39,7 @@ public class UserController {
             String code = ValidateCodeUtils.generateValidateCode(4).toString();
 
             log.info("code为{}",code);
-            httpSession.setAttribute(phone,code);
+            redisTemplate.opsForValue().set(phone,code,15, TimeUnit.MINUTES);
             return R.success("手机验证码短信发送成功");
         }
 
@@ -49,7 +54,7 @@ public class UserController {
 
         String code = map.get("code").toString();
         String phone = map.get("phone").toString();
-        Object attribute = httpSession.getAttribute(phone);
+        Object attribute = redisTemplate.opsForValue().get(phone);
         if(attribute!=null&&code.equals(attribute)){
 
             LambdaQueryWrapper<User> queryWrapper=new LambdaQueryWrapper<>();
@@ -61,6 +66,7 @@ public class UserController {
                 userService.save(one);
             }
             httpSession.setAttribute("user",one.getId());
+            redisTemplate.delete(phone);
             return R.success(one);
         }
 
