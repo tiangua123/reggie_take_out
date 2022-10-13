@@ -1,6 +1,8 @@
 package com.itheima.reggie.common;
 
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -14,12 +16,16 @@ import java.util.Map;
  */
 
 @Data
+@ApiModel("返回结果")
 public class R<T> implements Serializable {
 
+    @ApiModelProperty("编码")
     private Integer code;
 
+    @ApiModelProperty("信息")
     private String msg;
 
+    @ApiModelProperty("数据")
     private T data;
 
     private Map map=new HashMap();

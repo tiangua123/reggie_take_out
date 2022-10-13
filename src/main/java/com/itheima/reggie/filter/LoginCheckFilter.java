@@ -26,12 +26,17 @@ public class LoginCheckFilter implements Filter {
         String requestURI = servletRequest1.getRequestURI();
         log.info("本次请求的地址是{}",requestURI);
         String[] uris=new String[]{
-                "/backend/**",
-                "/front/**",
                 "/employee/login",
                 "/employee/logout",
+                "/backend/**",
+                "/front/**",
                 "/common/**",
-                "/user/**"
+                "/user/sendMsg",
+                "/user/login",
+                "/doc.html",
+                "/webjars/**",
+                "/swagger-resources",
+                "/v2/api-docs"
         };
 
         boolean check = check(uris, requestURI);
