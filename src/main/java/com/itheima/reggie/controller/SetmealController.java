@@ -42,9 +42,9 @@ public class SetmealController {
     private CategoryService categoryService;
 
     @PostMapping
-    @CacheEvict(value = "setmealCache",allEntries = true)
+    @CacheEvict(value = "setmealCache", allEntries = true)
     @ApiOperation(value = "套餐新增接口")
-    public R<String> save(@RequestBody SetmealDto setmealDto){
+    public R<String> save(@RequestBody SetmealDto setmealDto) {
         setmealService.saveWithDish(setmealDto);
         return R.success("新增套餐成功");
     }
@@ -52,6 +52,7 @@ public class SetmealController {
 
     /**
      * 分页查询
+     *
      * @param page
      * @param pageSize
      * @param name
@@ -60,19 +61,19 @@ public class SetmealController {
     @GetMapping("/page")
     @ApiOperation(value = "套餐分页查询")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "page",value = "页码",required = true),
-            @ApiImplicitParam(name = "pageSize",value = "一页多少",required = true),
-            @ApiImplicitParam(name="name",value = "套餐名称",required =false)
+            @ApiImplicitParam(name = "page", value = "页码", required = true),
+            @ApiImplicitParam(name = "pageSize", value = "一页多少", required = true),
+            @ApiImplicitParam(name = "name", value = "套餐名称", required = false)
     })
-    public R<Page> page(int page,int pageSize,String name){
-        Page<Setmeal> page1=new Page<>(page,pageSize);
-        Page<SetmealDto> page2=new Page<>();
-        LambdaQueryWrapper<Setmeal> queryWrapper=new LambdaQueryWrapper<>();
-        queryWrapper.like(name!=null,Setmeal::getName,name);
+    public R<Page> page(int page, int pageSize, String name) {
+        Page<Setmeal> page1 = new Page<>(page, pageSize);
+        Page<SetmealDto> page2 = new Page<>();
+        LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.like(name != null, Setmeal::getName, name);
         queryWrapper.orderByDesc(Setmeal::getUpdateTime);
-        setmealService.page(page1,queryWrapper);
+        setmealService.page(page1, queryWrapper);
 
-        BeanUtils.copyProperties(page1,page2,"records");
+        BeanUtils.copyProperties(page1, page2, "records");
         List<Setmeal> records = page1.getRecords();
         List<SetmealDto> list = records.stream().map((item) -> {
             Long categoryId = item.getCategoryId();
@@ -90,14 +91,15 @@ public class SetmealController {
 
     /**
      * 删除套餐分类
+     *
      * @param ids
      * @return
      */
 
     @DeleteMapping
-    @CacheEvict(value = "setmealCache",allEntries = true)
+    @CacheEvict(value = "setmealCache", allEntries = true)
     @ApiOperation(value = "套餐删除接口")
-    public R<String> delete(@RequestParam List<Long> ids){
+    public R<String> delete(@RequestParam List<Long> ids) {
         setmealService.deleteWithDish(ids);
         return R.success("删除成功");
     }
@@ -105,12 +107,13 @@ public class SetmealController {
 
     /**
      * 停售套餐
+     *
      * @param ids
      * @return
      */
     @PostMapping("status/0")
-    public R<String> stop( @RequestParam List<Long> ids){
-        for (Long id :ids) {
+    public R<String> stop(@RequestParam List<Long> ids) {
+        for (Long id : ids) {
             Setmeal setmealServiceById = setmealService.getById(id);
             setmealServiceById.setStatus(0);
             setmealService.updateById(setmealServiceById);
@@ -121,12 +124,13 @@ public class SetmealController {
 
     /**
      * 启售套餐
+     *
      * @param ids
      * @return
      */
     @PostMapping("status/1")
-    public R<String> start(@RequestParam List<Long> ids){
-        for (Long id :ids) {
+    public R<String> start(@RequestParam List<Long> ids) {
+        for (Long id : ids) {
             Setmeal setmealServiceById = setmealService.getById(id);
             setmealServiceById.setStatus(1);
             setmealService.updateById(setmealServiceById);
@@ -137,29 +141,44 @@ public class SetmealController {
 
     /**
      * 根据条件查询套餐数据
+     *
      * @param setmeal
      * @return
      */
     @GetMapping("/list")
-    @Cacheable(value = "setmealCache",key = "#setmeal.categoryId+'_'+#setmeal.status")
-    public R<List<Setmeal>> list(Setmeal setmeal){
+    @Cacheable(value = "setmealCache", key = "#setmeal.categoryId+'_'+#setmeal.status")
+    public R<List<Setmeal>> list(Setmeal setmeal) {
         LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(setmeal.getCategoryId() != null,Setmeal::getCategoryId,setmeal.getCategoryId());
-        queryWrapper.eq(setmeal.getStatus() != null,Setmeal::getStatus,setmeal.getStatus());
+        queryWrapper.eq(setmeal.getCategoryId() != null, Setmeal::getCategoryId, setmeal.getCategoryId());
+        queryWrapper.eq(setmeal.getStatus() != null, Setmeal::getStatus, setmeal.getStatus());
         queryWrapper.orderByDesc(Setmeal::getUpdateTime);
 
         List<Setmeal> list = setmealService.list(queryWrapper);
 
         return R.success(list);
     }
-//    /**
-//     * 根据条件查询套餐数据
-//     * @param setmeal
-//     * @return
-//     */
-//    @GetMapping("/list")
-//    @Cacheable(value = "setmealCache",key = "#setmeal.categoryId + '_' + #setmeal.status")
+
+
+
+//    @PostMapping
+//    public R<String> save(@RequestBody SetmealDto setmealDto){
+//        log.info("套餐信息：{}",setmealDto);
 //
+//        setmealService.saveWithDish(setmealDto);
+//
+//        return R.success("新增套餐成功");
+//    }
+//
+//    @DeleteMapping
+//    public R<String> delete(@RequestParam List<Long> ids){
+//        log.info("ids:{}",ids);
+//
+//        setmealService.deleteWithDish(ids);
+//
+//        return R.success("套餐数据删除成功");
+//    }
+//
+//    @GetMapping("/list")
 //    public R<List<Setmeal>> list(Setmeal setmeal){
 //        LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
 //        queryWrapper.eq(setmeal.getCategoryId() != null,Setmeal::getCategoryId,setmeal.getCategoryId());
@@ -170,4 +189,5 @@ public class SetmealController {
 //
 //        return R.success(list);
 //    }
+
 }

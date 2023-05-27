@@ -25,33 +25,34 @@ public class EmployeeController {
 
     /**
      * 员工登录
+     *
      * @param request
      * @param employee
      * @return
      */
 
     @PostMapping("/login")
-    public R<Employee> login(HttpServletRequest request, @RequestBody Employee employee){
+    public R<Employee> login(HttpServletRequest request, @RequestBody Employee employee) {
         String password = employee.getPassword();
         password = DigestUtils.md5DigestAsHex(password.getBytes(StandardCharsets.UTF_8));
 
         LambdaQueryWrapper<Employee> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Employee::getUsername,employee.getUsername());
+        queryWrapper.eq(Employee::getUsername, employee.getUsername());
         Employee emp = employeeService.getOne(queryWrapper);
 
-        if(emp == null){
+        if (emp == null) {
             return R.error("账户不存在");
         }
 
-        if(!emp.getPassword().equals(password)){
+        if (!emp.getPassword().equals(password)) {
             return R.error("密码不正确");
         }
 
-        if(emp.getStatus()==0){
+        if (emp.getStatus() == 0) {
             return R.error("账户已禁用");
         }
 
-        request.getSession().setAttribute("employee",emp.getId());
+        request.getSession().setAttribute("employee", emp.getId());
         return R.success(emp);
 
     }
@@ -60,21 +61,22 @@ public class EmployeeController {
      * 员工退出
      */
     @PostMapping("/logout")
-    public R<String> logout(HttpServletRequest request){
+    public R<String> logout(HttpServletRequest request) {
         request.getSession().removeAttribute("employee");
         return R.success("退出成功");
     }
 
     /**
      * 新增员工
+     *
      * @param request
      * @param employee
      * @return
      */
     @PostMapping
-    public R<String> save(HttpServletRequest request,@RequestBody Employee employee){
+    public R<String> save(HttpServletRequest request, @RequestBody Employee employee) {
 
-        log.info("新增员工信息为：{}",employee.toString());
+        log.info("新增员工信息为：{}", employee.toString());
 
         employee.setPassword(DigestUtils.md5DigestAsHex("123456".getBytes(StandardCharsets.UTF_8)));
 //        employee.setCreateTime(LocalDateTime.now());
@@ -91,20 +93,21 @@ public class EmployeeController {
 
     /**
      * 员工信息分页查询
+     *
      * @param page
      * @param pageSize
      * @param name
      * @return
      */
     @GetMapping("/page")
-    public R<Page> page(int page,int pageSize,String name){
-        log.info("page为{},pageSize为{},name为{}",page,pageSize,name);
+    public R<Page> page(int page, int pageSize, String name) {
+        log.info("page为{},pageSize为{},name为{}", page, pageSize, name);
 
         Page page1 = new Page(page, pageSize);
-        LambdaQueryWrapper<Employee> lambdaQueryWrapper=new LambdaQueryWrapper();
-        lambdaQueryWrapper.like(StringUtils.isNotEmpty(name),Employee::getName,name);
+        LambdaQueryWrapper<Employee> lambdaQueryWrapper = new LambdaQueryWrapper();
+        lambdaQueryWrapper.like(StringUtils.isNotEmpty(name), Employee::getName, name);
         lambdaQueryWrapper.orderByDesc(Employee::getUpdateTime);
-        employeeService.page(page1,lambdaQueryWrapper);
+        employeeService.page(page1, lambdaQueryWrapper);
         return R.success(page1);
     }
 
@@ -113,7 +116,7 @@ public class EmployeeController {
      */
 
     @PutMapping
-    public R<String> update(HttpServletRequest request,@RequestBody Employee employee){
+    public R<String> update(HttpServletRequest request, @RequestBody Employee employee) {
 
         log.info(employee.toString());
 //        Long empid = (Long) request.getSession().getAttribute("employee");
@@ -126,21 +129,20 @@ public class EmployeeController {
 
     /**
      * 根据id查询员工信息
+     *
      * @param id
      * @return
      */
     @GetMapping("/{id}")
-    public R<Employee> getById(@PathVariable Long id){
+    public R<Employee> getById(@PathVariable Long id) {
 
         log.info("根据id查询员工信息...");
         Employee employee = employeeService.getById(id);
-        if(employee != null){
+        if (employee != null) {
             return R.success(employee);
         }
         return R.error("没有查询到对应员工信息");
     }
-
-
 
 
 }

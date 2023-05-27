@@ -32,14 +32,14 @@ public class UserController {
 
 
     @PostMapping("/sendMsg")
-    public R<String> sendMsg(@RequestBody User user, HttpSession httpSession){
+    public R<String> sendMsg(@RequestBody User user, HttpSession httpSession) {
         String phone = user.getPhone();
 
-        if(!StringUtils.isEmpty(phone)){
+        if (!StringUtils.isEmpty(phone)) {
             String code = ValidateCodeUtils.generateValidateCode(4).toString();
 
-            log.info("code为{}",code);
-            redisTemplate.opsForValue().set(phone,code,15, TimeUnit.MINUTES);
+            log.info("code为{}", code);
+            redisTemplate.opsForValue().set(phone, code, 15, TimeUnit.MINUTES);
             return R.success("手机验证码短信发送成功");
         }
 
@@ -47,25 +47,24 @@ public class UserController {
     }
 
 
-
     @PostMapping("/login")
-    public R<User> login(@RequestBody Map map,HttpSession httpSession){
+    public R<User> login(@RequestBody Map map, HttpSession httpSession) {
 
 
         String code = map.get("code").toString();
         String phone = map.get("phone").toString();
         Object attribute = redisTemplate.opsForValue().get(phone);
-        if(attribute!=null&&code.equals(attribute)){
+        if (attribute != null && code.equals(attribute)) {
 
-            LambdaQueryWrapper<User> queryWrapper=new LambdaQueryWrapper<>();
-            queryWrapper.eq(User::getPhone,phone);
+            LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(User::getPhone, phone);
             User one = userService.getOne(queryWrapper);
-            if(one==null){
+            if (one == null) {
                 one = new User();
                 one.setPhone(phone);
                 userService.save(one);
             }
-            httpSession.setAttribute("user",one.getId());
+            httpSession.setAttribute("user", one.getId());
             redisTemplate.delete(phone);
             return R.success(one);
         }
